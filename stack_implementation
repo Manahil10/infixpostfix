@@ -1,0 +1,73 @@
+using namespace std;
+ 
+#define MAX 1000
+ 
+class Stack {
+    int top;
+ 
+public:
+    char a[MAX]; // Maximum size of Stack
+ 
+    Stack() { top = -1; }
+    void push(char x);
+    char pop();
+    void peek();
+    bool isEmpty();
+    bool isFull();
+    void clear(Stack a);
+};
+ 
+void Stack::push(char x)
+{
+    if (isFull()) {
+        cout << "Stack Overflow";
+        
+    }
+    else {
+        a[++top] = x;
+        cout << x << " pushed into stack\n";
+        
+    }
+}
+ 
+char Stack::pop()
+{
+    if (isEmpty()) {
+        cout << "Stack Underflow";
+        return 0;
+    }
+    else {
+        char x = a[top--];
+        return x;
+    }
+}
+void Stack::peek()
+{
+    if (isEmpty()) {
+        cout << "Stack is Empty";
+        
+    }
+    else {
+        char x = a[top];
+        cout<< x;
+    }
+}
+ 
+bool Stack::isEmpty()
+{
+    return (top < 0);
+}
+
+bool Stack::isFull()
+{
+    return (top == MAX - 1);
+}
+
+void Stack::clear(Stack a)
+{
+    while(!a.isEmpty())
+    {
+        a.pop();
+    }
+    
+}
