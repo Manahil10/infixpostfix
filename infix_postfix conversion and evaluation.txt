@@ -1,0 +1,285 @@
+#include <iostream>
+#include <string>
+using namespace std;
+
+#define MAX 1000
+
+class Stack
+{
+    int top;
+
+public:
+    char a[MAX]; // Maximum size of Stack
+
+    Stack() { top = -1; }
+    void push(char x);
+    char pop();
+    char peek();
+    bool isEmpty();
+    bool isFull();
+    void clear(Stack a);
+};
+
+void Stack::push(char x) //function to push element in stack
+{
+    if (isFull())
+    {
+        cout << "Stack Overflow";
+    }
+    else
+    {
+        a[++top] = x;
+    }
+}
+
+char Stack::pop() //function to remove element from stack
+{
+    if (isEmpty())
+    {
+        cout << "Stack Underflow";
+        return 0;
+    }
+    else
+    {
+        char x = a[top--];
+        return x;
+    }
+}
+char Stack::peek() //function to get top element from stack
+{
+    if (isEmpty())
+    {
+        cout << "Stack is Empty";
+        return 0;
+    }
+    else
+    {
+        char x = a[top];
+        return x;
+    }
+}
+
+bool Stack::isEmpty() //function to check where the stack is empty
+{
+    return (top < 0);
+}
+
+bool Stack::isFull() //function to check where the stack is full
+{
+    return (top == MAX - 1);
+}
+
+void Stack::clear(Stack a) //function to clear the stack
+{
+    while (!a.isEmpty())
+    {
+        a.pop();
+    }
+}
+bool is_operator(char symbol) //function to check whether character is operator or not
+{
+    if (symbol == '+' || symbol == '^' || symbol == '*' || symbol == '-' || symbol == '/')
+    {
+        return true;
+    }
+    else
+    {
+        return false;
+    }
+}
+int precedence(char symbol) //function to assign precedence to operators
+{
+    if (symbol == '^') /* exponent operator, highest precedence*/
+    {
+        return (3);
+    }
+    else if (symbol == '*' || symbol == '/')
+    {
+        return (2);
+    }
+    else if (symbol == '+' || symbol == '-') /* lowest precedence */
+    {
+        return (1);
+    }
+    else
+    {
+        return (0);
+    }
+}
+// Function to perform an operation and return output.
+int Operation_perform(char operation, int operand1, int operand2)
+{
+    if (operation == '+')
+        return operand1 + operand2;
+    else if (operation == '-')
+        return operand1 - operand2;
+    else if (operation == '*')
+        return operand1 * operand2;
+    else if (operation == '/')
+        return operand1 / operand2;
+
+    else
+        cout << "Unexpected Error \n";
+    return -1;
+}
+
+//function to convert infix to postfix
+string infix_postfix(string infix_expr)
+{
+    Stack s;
+    string postfix_expr;
+    int i = 0;
+    char c;
+    char y;
+    char item = infix_expr[i];
+
+    while (i < infix_expr.length())
+    {
+        //check whether symbol is opening bracket
+        if (item == '(' || item == '{' || item == '[')
+        {
+            s.push(item);
+        }
+
+        //check if character is operator
+        else if (is_operator(item))
+        {
+            if (!s.isEmpty())
+            {
+                y = s.peek();
+                //comparing precedence and then popping operators from stack
+                while (is_operator(y) && precedence(y) >= precedence(item))
+                {
+                    c = s.pop();
+                    postfix_expr += c;
+
+                    if (!s.isEmpty())
+                    {
+                        y = s.peek();
+                    }
+                    else
+                    {
+                        break;
+                    }
+                }
+            }
+            //pushing operator in stack
+            s.push(item);
+            //adding delimiter
+            postfix_expr += ' ';
+        }
+
+        //incrementing postfix expression if it is digit
+        else if (item >= '0' && item <= '9')
+        {
+            postfix_expr += item;
+        }
+
+        //popping operators when closing bracket is encountered until open bracket is received
+        else if (item == ')' || item == '}' || item == ']')
+        {
+            switch (item)
+            {
+            case ')':
+                y = s.pop();
+                while (y != '(')
+                {
+                    postfix_expr += y;
+                    y = s.pop();
+                }
+                break;
+            case '}':
+                y = s.pop();
+                while (y != '{')
+                {
+                    postfix_expr += y;
+                    y = s.pop();
+                }
+                break;
+            case ']':
+                y = s.pop();
+                while (y != '[')
+                {
+                    postfix_expr += y;
+                    y = s.pop();
+                }
+                break;
+            }
+        }
+
+        i++;
+        item = infix_expr[i];
+    }
+
+    //popping all elements until stack is empty
+    if (!s.isEmpty())
+    {
+
+        while (!s.isEmpty())
+        {
+            y = s.pop();
+            postfix_expr += y;
+        }
+    }
+
+    return postfix_expr;
+}
+
+// Function to evaluate postfix expression
+int EvaluatePostfix(string expression)
+{
+    Stack S;
+
+    //iterating postfix expression
+    for (int i = 0; i < expression.length(); i++)
+    {
+        //continue if a delimiter is encountered
+        if (expression[i] == ' ')
+            continue;
+
+        //performing operations if operator is encountered
+        else if (is_operator(expression[i]))
+        {
+            int operand2 = S.peek();
+            S.pop();
+            int operand1 = S.peek();
+            S.pop();
+
+            int result = Operation_perform(expression[i], operand1, operand2);
+            //pushing back the result into stack
+            S.push(result);
+        }
+
+        //calculating two digit number and pushing into stack
+        else if (isdigit(expression[i]))
+        {
+            int operand = 0;
+            while (i < expression.length() && isdigit(expression[i]))
+            {
+                operand = (operand * 10) + (expression[i] - '0');
+                i++;
+            }
+            i--;
+            S.push(operand);
+        }
+    }
+    //returning the last element remaining in stack after the evaluation
+    return S.peek();
+}
+
+//main function to test the above code
+int main()
+{
+    cout << "-------- INFIX TO POSTFIX CONVERSION AND EVALUATION--------" << endl;
+    string infix_expr;
+    cout << "Enter your expression:" << endl;
+    cin >> infix_expr;
+
+    string postfix = infix_postfix(infix_expr);
+
+    cout << "Postfix is: " << postfix << endl;
+
+    int result = EvaluatePostfix(postfix);
+    cout << "exp = " << result << endl;
+   return 0;
+}
